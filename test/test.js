@@ -13,6 +13,7 @@ const curveTest = (curveType, name) => {
         miscTest()
         shareTest()
         addTest()
+        generatorOfPublicKeyTest()
         console.log('all ok')
         benchAll()
       } catch (e) {
@@ -22,7 +23,7 @@ const curveTest = (curveType, name) => {
     })
 }
 
-async function curveTestAll () {
+async function curveTestAll() {
   // can't parallel
   await curveTest(bls.BN254, 'BN254')
   await curveTest(bls.BLS12_381, 'BLS12_381')
@@ -30,14 +31,14 @@ async function curveTestAll () {
 
 curveTestAll()
 
-function serializeSubTest (t, Cstr) {
+function serializeSubTest(t, Cstr) {
   const s = t.serializeToHexStr()
   const t2 = new Cstr()
   t2.deserializeHexStr(s)
   assert.deepEqual(t.serialize(), t2.serialize())
 }
 
-function serializeTest () {
+function serializeTest() {
   const sec = new bls.SecretKey()
   sec.setByCSPRNG()
   serializeSubTest(sec, bls.SecretKey)
@@ -51,7 +52,7 @@ function serializeTest () {
   serializeSubTest(id, bls.Id)
 }
 
-function signatureTest () {
+function signatureTest() {
   const sec = new bls.SecretKey()
 
   sec.setByCSPRNG()
@@ -68,7 +69,7 @@ function signatureTest () {
   assert(pub.verify(sig, msg))
 }
 
-function bench (label, count, func) {
+function bench(label, count, func) {
   const start = performance.now()
   for (let i = 0; i < count; i++) {
     func()
@@ -79,7 +80,7 @@ function bench (label, count, func) {
   console.log(label + ' ' + roundTime)
 }
 
-function benchBls () {
+function benchBls() {
   const msg = 'hello wasm'
   const sec = new bls.SecretKey()
   sec.setByCSPRNG()
@@ -89,7 +90,7 @@ function benchBls () {
   bench('time_verify_class', 50, () => pub.verify(sig, msg))
 }
 
-function benchAll () {
+function benchAll() {
   benchBls()
 }
 
@@ -97,7 +98,7 @@ function benchAll () {
   return [min, max)
   assume min < max
 */
-function randRange (min, max) {
+function randRange(min, max) {
   return min + Math.floor(Math.random() * (max - min))
 }
 
@@ -105,7 +106,7 @@ function randRange (min, max) {
   select k of [0, n)
   @note not uniformal distribution
 */
-function randSelect (k, n) {
+function randSelect(k, n) {
   let a = []
   let prev = -1
   for (let i = 0; i < k; i++) {
@@ -116,7 +117,7 @@ function randSelect (k, n) {
   return a
 }
 
-function miscTest () {
+function miscTest() {
   const idDec = '65535'
   const id = new bls.Id()
   id.setStr(idDec)
@@ -124,7 +125,7 @@ function miscTest () {
   assert(id.getStr(16), 'ffff')
 }
 
-function shareTest () {
+function shareTest() {
   const k = 4
   const n = 10
   const msg = 'this is a pen'
@@ -156,7 +157,7 @@ function shareTest () {
   */
   for (let i = 0; i < n; i++) {
     const id = new bls.Id()
-//    blsIdSetInt(id, i + 1)
+    //    blsIdSetInt(id, i + 1)
     id.setByCSPRNG()
     idVec.push(id)
     const sk = new bls.SecretKey()
@@ -201,7 +202,7 @@ function shareTest () {
   }
 }
 
-function addTest () {
+function addTest() {
   const n = 5
   const m = "abc"
   const sec = []
@@ -222,4 +223,16 @@ function addTest () {
   assert(pub[0].verify(sig[0], m))
   const sig2 = sec[0].sign(m)
   assert(sig2.isEqual(sig[0]))
+}
+
+function generatorOfPublicKeyTest() {
+  let gen = new bls.PublicKey();
+  gen.deserializeUncompressed("1 24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be");
+  bls.blsSetGeneratorOfPublicKey(gen)
+  let sk = new bls.SecretKey()
+  sk.setInt(1);
+  let pk = sk.getPublicKey();
+  console.log(sk.serializeToHexStr())
+  console.log(pk.serializeToHexStr())
+  assert(pk.serializeToHexStr() == "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8");
 }

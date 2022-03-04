@@ -7,7 +7,6 @@
   "scripts": {
     "test": "node test/test.js"
   },
-  "types": "src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/herumi/bls-wasm.git"

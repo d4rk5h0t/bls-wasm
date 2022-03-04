@@ -25,6 +25,7 @@ EMCC_OPT+=-s SINGLE_FILE=1
 EMCC_OPT+=--minify 0
 EMCC_OPT+=-s ABORTING_MALLOC=0
 EMCC_OPT+=-s DISABLE_EXCEPTION_CATCHING=1
+EMCC_OPT+=-std=c++03
 
 bls_c.js:
 	emcc -o $@ $(BLS_DIR)/src/bls_c384_256.cpp $(MCL_DIR)/src/fp.cpp $(EMCC_OPT)
